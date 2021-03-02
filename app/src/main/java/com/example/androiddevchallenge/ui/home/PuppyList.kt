@@ -267,7 +267,7 @@ var puppyList = listOf(
         location = "Bogotá, Colombia"
     ),
     Puppy(
-        id = 2, age = "2.5",
+        id = 3, age = "2.5",
         description = "But I must explain to you how all this mistaken idea of denouncing but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?",
         image = "https://www.nawpic.com/media/2020/puppy-nawpic-2.jpg",
         male = false,
