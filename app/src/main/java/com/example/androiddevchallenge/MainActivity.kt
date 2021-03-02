@@ -1,0 +1,99 @@
+/*
+ * Copyright 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.example.androiddevchallenge
+
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
+import androidx.navigation.NavHost
+import androidx.navigation.NavType
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navArgument
+import com.example.androiddevchallenge.ui.theme.MyTheme
+import androidx.navigation.compose.rememberNavController
+import com.example.androiddevchallenge.data.Puppy
+import com.example.androiddevchallenge.ui.detail.DetailScreen
+import com.example.androiddevchallenge.ui.home.HomeScreen
+import com.example.androiddevchallenge.ui.home.puppyList
+import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
+
+class MainActivity : AppCompatActivity() {
+    @ExperimentalStdlibApi
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        setContent {
+            MyTheme {
+                ProvideWindowInsets {
+                    MyApp()
+                }
+            }
+        }
+    }
+}
+
+// Start building your app here!
+@ExperimentalStdlibApi
+@Composable
+fun MyApp() {
+    val navController = rememberNavController()
+    androidx.navigation.compose.NavHost(
+        navController = navController,
+        startDestination = "HomeScreen",
+        builder = {
+            composable("HomeScreen") {
+                HomeScreen(navController = navController)
+            }
+            composable(
+                "puppyScreen/{puppyId}",
+                arguments = listOf(navArgument("puppyId") {
+                    type = NavType.IntType
+                })
+            ) {
+                it.arguments?.getInt("puppyId").run {
+                    puppyList.first { puppyObj -> puppyObj.id == this ?: 0 }.let {
+                        DetailScreen(navController = navController, puppy = it)
+                    }
+                }
+            }
+        })
+}
+
+@ExperimentalStdlibApi
+@Preview("Light Theme", widthDp = 360, heightDp = 640)
+@Composable
+fun LightPreview() {
+    MyTheme {
+        MyApp()
+    }
+}
+
+@ExperimentalStdlibApi
+@Preview("Dark Theme", widthDp = 360, heightDp = 640)
+@Composable
+fun DarkPreview() {
+    MyTheme(darkTheme = true) {
+        MyApp()
+    }
+}
