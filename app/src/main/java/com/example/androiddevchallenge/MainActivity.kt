@@ -16,29 +16,24 @@
 package com.example.androiddevchallenge
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
-import androidx.navigation.NavHost
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import com.example.androiddevchallenge.ui.theme.MyTheme
 import androidx.navigation.compose.rememberNavController
-import com.example.androiddevchallenge.data.Puppy
+import com.example.androiddevchallenge.data.viewmodel.FirestoreViewModel
 import com.example.androiddevchallenge.ui.detail.DetailScreen
 import com.example.androiddevchallenge.ui.home.HomeScreen
-import com.example.androiddevchallenge.ui.home.puppyList
 import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
 
 class MainActivity : AppCompatActivity() {
+    private val fireStoreViewModel by viewModels<FirestoreViewModel>()
+
     @ExperimentalStdlibApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             MyTheme {
                 ProvideWindowInsets {
-                    MyApp()
+                    MyApp(firestoreViewModel = fireStoreViewModel)
                 }
             }
         }
@@ -56,44 +51,32 @@ class MainActivity : AppCompatActivity() {
 // Start building your app here!
 @ExperimentalStdlibApi
 @Composable
-fun MyApp() {
+fun MyApp(firestoreViewModel: FirestoreViewModel) {
     val navController = rememberNavController()
     androidx.navigation.compose.NavHost(
         navController = navController,
         startDestination = "HomeScreen",
         builder = {
             composable("HomeScreen") {
-                HomeScreen(navController = navController)
+                HomeScreen(
+                    navController = navController,
+                    firestoreViewModel = firestoreViewModel)
             }
             composable(
                 "puppyScreen/{puppyId}",
                 arguments = listOf(navArgument("puppyId") {
-                    type = NavType.IntType
+                    type = NavType.StringType
                 })
             ) {
-                it.arguments?.getInt("puppyId").run {
-                    puppyList.first { puppyObj -> puppyObj.id == this ?: 0 }.let {
-                        DetailScreen(navController = navController, puppy = it)
+                it.arguments?.getString("puppyId").run {
+                    firestoreViewModel.puppyItems.value?.first { puppyObj -> puppyObj.id == this ?: 0 }.let {
+                        puppyFound ->
+                        if (puppyFound != null){
+                            DetailScreen(navController = navController, puppy = puppyFound)
+                        }
                     }
                 }
             }
-        })
-}
-
-@ExperimentalStdlibApi
-@Preview("Light Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun LightPreview() {
-    MyTheme {
-        MyApp()
-    }
-}
-
-@ExperimentalStdlibApi
-@Preview("Dark Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun DarkPreview() {
-    MyTheme(darkTheme = true) {
-        MyApp()
-    }
+        }
+    )
 }

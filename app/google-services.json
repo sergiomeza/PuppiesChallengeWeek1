@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "895330981125",
+    "firebase_url": "https://sergiomeza-e5bfa.firebaseio.com",
+    "project_id": "sergiomeza-e5bfa",
+    "storage_bucket": "sergiomeza-e5bfa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:895330981125:android:a2a6241ed30bc9ff0b536c",
+        "android_client_info": {
+          "package_name": "com.sergiomeza.androiddevchallenge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "895330981125-13ae58ej79p0l0bo2juspc6h6rpg2952.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdJefwgETbFTaQyknmX-MqYqTqJRs4TSo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "895330981125-13ae58ej79p0l0bo2juspc6h6rpg2952.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:895330981125:android:be1e00d81d802de0",
+        "android_client_info": {
+          "package_name": "media360.parking360"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "895330981125-13ae58ej79p0l0bo2juspc6h6rpg2952.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdJefwgETbFTaQyknmX-MqYqTqJRs4TSo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "895330981125-13ae58ej79p0l0bo2juspc6h6rpg2952.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

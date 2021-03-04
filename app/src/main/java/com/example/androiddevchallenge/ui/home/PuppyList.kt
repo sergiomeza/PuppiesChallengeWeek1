@@ -1,43 +1,62 @@
 package com.example.androiddevchallenge.ui.home
 
+import android.util.Log
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.navigate
 import com.example.androiddevchallenge.R
-import com.example.androiddevchallenge.data.Puppy
-import com.example.androiddevchallenge.data.PuppyTags
+import com.example.androiddevchallenge.data.model.Filter
+import com.example.androiddevchallenge.data.model.Puppy
+import com.example.androiddevchallenge.data.model.filters
+import com.example.androiddevchallenge.data.viewmodel.FirestoreViewModel
 import com.example.androiddevchallenge.ui.theme.customFontFamily
+import com.example.androiddevchallenge.ui.theme.purple200
 import dev.chrisbanes.accompanist.coil.CoilImage
+import dev.chrisbanes.accompanist.insets.statusBarsHeight
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import java.util.*
 
-
 @ExperimentalStdlibApi
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController,
+               firestoreViewModel: FirestoreViewModel) {
+    firestoreViewModel.getPuppies()
+    val items: List<Puppy> by firestoreViewModel.puppyItems.observeAsState(listOf())
     Scaffold(
         backgroundColor = MaterialTheme.colors.background,
         topBar = { PuppyListTopLayout(navController = navController) },
     ) {
-        MainContent(puppies = puppyList, navController = navController)
+        MainContent(puppies = items, navController = navController)
     }
 }
 
@@ -47,6 +66,9 @@ fun MainContent(puppies: List<Puppy>, navController: NavController) {
     Box(modifier = Modifier.padding(bottom = 70.dp)) {
         val listState = rememberLazyListState()
         LazyColumn(content = {
+            item {
+                FilterBar(filters)
+            }
             items(puppies){ puppy ->
                 PuppyRow(
                     puppy = puppy,
@@ -54,6 +76,20 @@ fun MainContent(puppies: List<Puppy>, navController: NavController) {
                     navController = navController)
             }
         }, state = listState)
+    }
+}
+
+@Composable
+fun FilterBar(filters: List<Filter>) {
+    LazyRow(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
+        modifier = Modifier.heightIn(min = 56.dp)
+    ) {
+        items(filters) { filter ->
+            FilterChip(filter)
+        }
     }
 }
 
@@ -140,10 +176,14 @@ fun PuppyRow(puppy: Puppy, modifier: Modifier, navController: NavController) {
 fun PuppyHeadImg(puppy: Puppy,
                  modifier: Modifier,
                  isDetail: Boolean = false,
-                 navController: NavController) {
+                 navController: NavController,
+                 scroll: Int = 0) {
+    var paddingHorizontal = 16
+    var paddingVertical = 16
+    var aligment = Alignment.BottomStart
     Box(modifier = modifier) {
         CoilImage(
-            data = puppy.image,
+            data = puppy.image ?: "",
             contentDescription = puppy.description,
             contentScale = ContentScale.Crop,
         )
@@ -174,6 +214,11 @@ fun PuppyHeadImg(puppy: Puppy,
                 )
             }
         }
+        if(isDetail && scroll < 130){
+            paddingHorizontal = 45
+            paddingVertical = 4
+            aligment = Alignment.Center
+        }
         Column(
             Modifier
                 .fillMaxWidth()
@@ -187,8 +232,9 @@ fun PuppyHeadImg(puppy: Puppy,
                     )
                 )
         ) {
-            Column(modifier =
-            Modifier.padding(16.dp)
+            Column(modifier = Modifier
+                .padding(vertical = paddingVertical.dp,
+                    horizontal = paddingHorizontal.dp)
             ) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -226,7 +272,7 @@ fun PuppyHeadImg(puppy: Puppy,
                     )
                     Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                     Text(
-                        text = puppy.location,
+                        text = puppy.location ?: "",
                         fontWeight = FontWeight.Medium,
                         fontFamily = customFontFamily,
                         color = Color.White
@@ -237,41 +283,77 @@ fun PuppyHeadImg(puppy: Puppy,
     }
 }
 
-var puppyList = listOf(
-    Puppy(
-        id = 0, age = "3",
-        description = "\"Lorem ipsum dolor sit amet, consectetur adiplaboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\"",
-        image = "https://dogtime.com/assets/uploads/2011/03/puppy-development.jpg",
-        male = true,
-        name = "Marcos pomo",
-        location = "Cali, Colombia"
-    ),
-    Puppy(
-        id = 1, age = "2",
-        description = "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam ra dolor sit amet, con",
-        image = "https://images2.minutemediacdn.com/image/upload/c_fill,g_auto,h_1248,w_2220/v1584388937/shape/mentalfloss/536413-gettyimages-1077470274.jpg?itok=NoDcW5uz",
-        male = false,
-        name = "Puppy Mateo",
-        location = "Bucaramanga, Colombia",
-        tags = listOf(PuppyTags(name = "Healthy"), PuppyTags(name = "Fun"),
-            PuppyTags(name = "Sweet"), PuppyTags(name = "Love"), PuppyTags(name = "Yep"),
-            PuppyTags(name = "Sisa")
-        ),
-    ),
-    Puppy(
-        id = 2, age = "1.5",
-        description = "But I must explain to you how all this mistaken idea of denouncing but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?",
-        image = "https://static.scientificamerican.com/sciam/cache/file/D059BC4A-CCF3-4495-849ABBAFAED10456_source.jpg?w=590&h=800&526ED1E1-34FF-4472-B348B8B4769AB2A1",
-        male = true,
-        name = "Rocky balboa",
-        location = "Bogotá, Colombia"
-    ),
-    Puppy(
-        id = 3, age = "2.5",
-        description = "But I must explain to you how all this mistaken idea of denouncing but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?",
-        image = "https://www.nawpic.com/media/2020/puppy-nawpic-2.jpg",
-        male = false,
-        name = "RMichi michi",
-        location = "New York, USA"
+@Composable
+fun FilterChip(
+    filter: Filter,
+    modifier: Modifier = Modifier,
+    shape: Shape = MaterialTheme.shapes.small
+) {
+    val (selected, setSelected) = filter.enabled
+    val border = Modifier.fadeInDiagonalGradientBorder(
+        showBorder = false,
+        colors = listOf(Color.Gray, Color.DarkGray),
+        shape = shape
     )
+    val backgroundColor by animateColorAsState(
+        if (selected) purple200 else Color.White
+    )
+    val textColor by animateColorAsState(
+        if (selected) purple200 else Color.Gray
+    )
+
+    Surface(
+        modifier = modifier
+            .background(
+                color = backgroundColor
+            )
+            .height(28.dp)
+            .then(border),
+        contentColor = textColor,
+        shape = shape,
+        elevation = 2.dp
+    ) {
+        Box (
+            modifier = Modifier.toggleable(
+                value = selected,
+                onValueChange = setSelected
+            )
+        ){
+            Text(
+                text = filter.name,
+                style = MaterialTheme.typography.caption,
+                maxLines = 1,
+                modifier = Modifier.padding(
+                    horizontal = 20.dp,
+                    vertical = 6.dp
+                )
+            )
+        }
+    }
+}
+
+fun Modifier.fadeInDiagonalGradientBorder(
+    showBorder: Boolean,
+    colors: List<Color>,
+    borderSize: Dp = 2.dp,
+    shape: Shape
+) = composed {
+    val animatedColors = List(colors.size) { i ->
+        animateColorAsState(if (showBorder) colors[i] else colors[i].copy(alpha = 0f)).value
+    }
+    diagonalGradientBorder(
+        colors = animatedColors,
+        borderSize = borderSize,
+        shape = shape
+    )
+}
+
+fun Modifier.diagonalGradientBorder(
+    colors: List<Color>,
+    borderSize: Dp = 2.dp,
+    shape: Shape
+) = border(
+    width = borderSize,
+    brush = Brush.linearGradient(colors),
+    shape = shape
 )
